@@ -4,7 +4,6 @@ const { clientSchema } = require("../schema/joyschema");
 const { updateClientSchema } = require("../schema/joyschema");
 const createClient = async (req, res) => {
   try {
-    console.log("this is the create client route");
     const error = clientSchema.validate(req.body);
     if (error) {
       // return res.status(400).json({ message: error });

@@ -9,7 +9,7 @@ const register = async (req, res, next) => {
       // return res.status(400).json({ message: error });
       console.log(error);
     }
-
+    console.log(req.body);
     const { userName, firstName, lastName, email, password } = req.body;
     const existingUser = await User.findOne({
       where: { userName, email },

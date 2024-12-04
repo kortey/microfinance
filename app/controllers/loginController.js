@@ -1,6 +1,6 @@
 const dotenv = require("dotenv");
 const jwt = require("jsonwebtoken");
-const { compare } = require("bcrypt");
+const bcrypt = require("bcrypt");
 const { User } = require("../../models");
 dotenv.config();
 
@@ -28,12 +28,12 @@ const login = async (req, res, next) => {
       return error;
     }
 
-    if (!compare(password, user.password)) {
-      let error = res.status(400).json({
-        status: "bad",
-        message: "the enterd password is incorrect",
+    const isMatch = await bcrypt.compare(password, user.password);
+
+    if (!isMatch) {
+      return res.status(403).json({
+        message: "the password you entered is incorrect",
       });
-      return error;
     }
 
     const token = jwt.sign(
@@ -46,7 +46,7 @@ const login = async (req, res, next) => {
 
     res.status(201).json({ user, token });
   } catch (err) {
-    next(err); // Pass the error to the middleware
+    next(err);
   }
 };
 
