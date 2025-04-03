@@ -10,7 +10,7 @@ const authMiddleware = async (req, res, next) => {
 
   if (!token) {
     return res.status(401).json({
-      message: "sorry you are not authorized",
+      message: "sory you are not authorized",
       status: 401,
     });
   }

@@ -1,9 +1,12 @@
 const { Payment } = require("../../models");
 const { Loan } = require("../../models");
+const { Client } = require("../../models");
+const { User } = require("../../models");
 const { paymentSchema } = require("../schema/joyschema");
 
 const createPayment = async (req, res) => {
   try {
+    
     const { error } = paymentSchema.validate(req.body);
     if (error) {
       return res.status(400).json({ message: error.details[0].message });
@@ -15,6 +18,7 @@ const createPayment = async (req, res) => {
     }
 
     const loanId = req.params.loanId;
+    console.log(loanId)
     if (!req.params.loanId) {
       return res.status(400).json({ message: "provide loan id" });
     }
@@ -69,17 +73,36 @@ const createPayment = async (req, res) => {
 
 const getPayments = async (req, res) => {
   try {
+    // Fetch payments with associated client, user, and loan details
     const payments = await Payment.findAll({
       where: {
         createdByUserId: req.user.userId,
       },
+      include: [
+        {
+          model: Client, // Include the Client model
+          attributes: ["clientId", "firstName", "lastName", "email", "phone"], // Specify the fields to include
+        },
+        {
+          model: User, // Include the User model
+          attributes: ["userId", "userName", "email", "role"], // Specify the fields to include
+        },
+        {
+          model: Loan, // Include the Loan model
+          attributes: ["loanId", "loanAmount", "amountLeft", "interestRate"], // Specify the fields to include
+        },
+      ],
     });
-    if (!payments) {
-      return res.status(404).json({ message: "payments not found" });
+
+    if (!payments || payments.length === 0) {
+      return res.status(404).json({ message: "No payments found" });
     }
+
+    // Return the payments with associated details
     res.status(200).json({ payments });
   } catch (error) {
-    return res.status(500).json({ message: error });
+    console.error("Error fetching payments:", error);
+    return res.status(500).json({ message: error.message });
   }
 };
 
@@ -106,7 +129,22 @@ const getClientPayments = async (req, res) => {
 
 const getAllPayments = async (req, res) => {
   try {
-    const payments = await Payment.findAll();
+    const payments = await Payment.findAll({
+      include: [
+        {
+          model: Client, // Include the Client model
+          attributes: ["clientId", "firstName", "lastName", "email", "phone"], // Specify the fields to include
+        },
+        {
+          model: User, // Include the User model
+          attributes: ["userId", "userName", "email", "role"], // Specify the fields to include
+        },
+        {
+          model: Loan, // Include the Loan model
+          attributes: ["loanId", "loanAmount", "amountLeft", "interestRate"], // Specify the fields to include
+        },
+      ],
+    });
     if (!payments) {
       return res.status(404).json({ message: "payments not found" });
     }
@@ -169,6 +207,7 @@ const deletePayment = async (req, res) => {
 const updatePayment = async (req, res) => {
   try {
     const { id } = req.params;
+    console.log(req.params);
     if (!id) {
       return res.status(400).json({ message: "provide payment id" });
     }
@@ -245,6 +284,86 @@ const updatePayment = async (req, res) => {
     return res.status(500).json({ message: error });
   }
 };
+
+const singlePayment = async (req, res) => {
+  try {
+    const { id } = req.params;
+    
+    if (!id) {
+      return res.status(400).json({ message: "Provide payment id" });
+    }
+
+    const payment = await Payment.findByPk(id, {
+      include: [
+        {
+          model: Client,
+          attributes: ["clientId", "firstName", "lastName", "email", "phone"],
+        },
+        {
+          model: User,
+          attributes: ["userId", "userName", "email", "role"],
+        },
+        {
+          model: Loan,
+          attributes: ["loanId", "loanAmount", "amountLeft", "interestRate"],
+        },
+      ],
+    });
+
+    if (!payment) {
+      return res.status(404).json({ message: "Payment not found" });
+    }
+
+    res.status(200).json({ payment });
+  } catch (error) {
+    console.error("Error fetching single payment:", error);
+    return res.status(500).json({ message: error.message });
+  }
+};
+
+const getPaymentsByLoan = async (req, res) => {
+  const { loanId } = req.params;
+  console.log(loanId);
+  console.log(req.params);
+
+  try {
+    if (!loanId) {
+      return res.status(400).json({ message: "Provide loan id" });
+    }
+
+    const payments = await Payment.findAll({
+      where: {
+        loanId: loanId,
+      },
+      include: [
+        {
+          model: Client,
+          attributes: ["clientId", "firstName", "lastName", "email", "phone"],
+        },
+        {
+          model: User,
+          attributes: ["userId", "userName", "email", "role"],
+        },
+        {
+          model: Loan,
+          attributes: ["loanId", "loanAmount", "amountLeft", "interestRate"],
+        },
+      ],
+    });
+
+    if (!payments || payments.length === 0) {
+      return res
+        .status(404)
+        .json({ message: "No payments found for this loan" });
+    }
+
+    res.status(200).json({ payments });
+  } catch (error) {
+    console.error("Error fetching payments by loan:", error);
+    return res.status(500).json({ message: error.message });
+  }
+};
+
 module.exports = {
   createPayment,
   getPayments,
@@ -252,4 +371,6 @@ module.exports = {
   getClientPayments,
   deletePayment,
   updatePayment,
+  singlePayment,
+  getPaymentsByLoan, // Added getPaymentsByLoan export
 };

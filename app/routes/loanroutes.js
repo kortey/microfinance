@@ -9,6 +9,7 @@ const {
   getSingleLoan,
   deleteLoan,
   updateLoan,
+  getClientLoans,
 } = require("../controllers/loanscontrollers");
 
 const loanRouter = express.Router();
@@ -18,4 +19,5 @@ loanRouter.get("/admin/loans", [authMiddleware, adminMiddleware], getAllLoans);
 loanRouter.get("/loans/:id", [authMiddleware], getSingleLoan);
 loanRouter.delete("/loans/:id", [authMiddleware, adminMiddleware], deleteLoan);
 loanRouter.put("/loans/:id", [authMiddleware, adminMiddleware], updateLoan);
+loanRouter.get("/clients/:clientId/loans", [authMiddleware], getClientLoans);
 module.exports = loanRouter;

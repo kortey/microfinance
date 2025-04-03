@@ -6,7 +6,6 @@ const authMiddleware = require("../middlewares/authmiddleware");
 
 registerRouter.post(
   "/auth/register",
-  [authMiddleware, adminMiddleware],
   register
 );
 

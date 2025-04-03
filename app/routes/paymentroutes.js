@@ -9,6 +9,8 @@ const {
   getClientPayments,
   deletePayment,
   updatePayment,
+  singlePayment,
+  getPaymentsByLoan, // Import getPaymentsByLoan
 } = require("../controllers/paymentcontroller");
 
 paymentrouter.post(
@@ -41,6 +43,16 @@ paymentrouter.put(
   "/admin/payments/:id",
   [authMiddleware, adminMiddleware],
   updatePayment
+);
+
+// Route to get a single payment by ID
+paymentrouter.get("/payments/:id", [authMiddleware], singlePayment);
+
+// Route to get all payments for a specific loan
+paymentrouter.get(
+  "/loans/:loanId/payments",
+  [authMiddleware],
+  getPaymentsByLoan
 );
 
 module.exports = paymentrouter;

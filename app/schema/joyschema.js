@@ -50,13 +50,13 @@ const loanSchema = Joi.object({
   duration: Joi.number().required(),
   startDate: Joi.string().required(),
   endDate: Joi.string().required(),
-  amountLeft: Joi.number().required(),
+  
 });
 
 const updateLoanSchema = Joi.object({
   loanAmount: Joi.number().required(),
   interestRate: Joi.number().required(),
-  duration: Joi.number().required(),
+  repaymentTerm: Joi.number().required(),
   startDate: Joi.string().required(),
   endDate: Joi.string().required(),
   amountLeft: Joi.number().required(),

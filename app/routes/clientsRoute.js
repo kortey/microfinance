@@ -8,6 +8,7 @@ const {
   getSingleClient,
   deleteClient,
   updateClient,
+  getClientsByUserId,
 } = require("../controllers/clientscontroller");
 const clientRouter = express.Router();
 
@@ -29,6 +30,9 @@ clientRouter.put(
   [authMiddleware, adminMiddleware],
   updateClient
 );
+
+clientRouter.get('/users/:id/clients', [authMiddleware, adminMiddleware], getClientsByUserId);
+
 module.exports = {
   clientRouter,
 };
